@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+
+<AnchorPane id="AnchorPane" fx:id="root" minWidth="126.0" prefHeight="337.0003999999899" prefWidth="538.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="cz.fi.muni.ib053_house.gui.HouseController">
+  <children>
+    <Label fx:id="helloLabel" layoutX="126.0" layoutY="120.0" minHeight="16.0" minWidth="69.0" />
+    <BorderPane fx:id="brdrPn" layoutX="0.0" layoutY="0.0" prefHeight="-1.0" prefWidth="-1.0">
+      <center>
+        <ScrollPane prefHeight="337.9998779296875" prefWidth="347.0">
+          <content>
+            <AnchorPane id="Content" fx:id="canvas" minHeight="0.0" minWidth="0.0" prefHeight="336.0003662109375" prefWidth="356.0" />
+          </content>
+        </ScrollPane>
+      </center>
+      <left>
+        <Pane prefHeight="338.0" prefWidth="181.0" style="-fx-background-color:#D8D8D8;">
+          <children>
+            <Label layoutX="14.0" layoutY="11.0" prefHeight="16.0" text="Settings:" />
+            <Label layoutX="23.0" layoutY="27.0" text="Control Unit Port:" />
+            <Label layoutX="23.0" layoutY="40.0" text="Server URL:" />
+            <Label layoutX="23.0" layoutY="53.0" text="Floor count:" />
+            <Label layoutX="23.0" layoutY="66.0" text="Ground zero:" />
+            <Label layoutX="14.0" layoutY="95.0" text="Runtime info:" />
+            <Label layoutX="29.0" layoutY="108.0" text="Current floor:" />
+            <Label id="" fx:id="lblControlUnitPort" layoutX="141.0" layoutY="27.0" text="Label" />
+            <Label id="" fx:id="lblServerUrl" layoutX="141.0" layoutY="42.0" text="Label" />
+            <Label id="" fx:id="lblFloorCount" layoutX="141.0" layoutY="55.0" text="Label" />
+            <Label id="" fx:id="lblGroundZero" layoutX="141.0" layoutY="68.0" text="Label" />
+            <Label id="" fx:id="lblCurrentFloor" layoutX="141.0" layoutY="110.0" text="Label" />
+            <TextArea id="" fx:id="txtAreaOutput" editable="false" layoutX="0.0" layoutY="181.0" prefWidth="167.0" wrapText="true" />
+            <Label layoutX="10.0" layoutY="162.0" text="gui output:" />
+          </children>
+        </Pane>
+      </left>
+    </BorderPane>
+  </children>
+</AnchorPane>

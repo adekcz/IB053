@@ -1,0 +1,2 @@
+localhost;8081;5;3
+//serverUrl;port;pocetPater
