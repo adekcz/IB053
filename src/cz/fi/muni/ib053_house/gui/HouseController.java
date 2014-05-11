@@ -1,18 +1,21 @@
 package cz.fi.muni.ib053_house.gui;
 
+import cz.fi.muni.ib053_house.entities.ElevatorStatus;
+import cz.fi.muni.ib053_house.entities.FloorGuiElements;
 import cz.fi.muni.ib053_house.entities.HouseGuiElements;
 import cz.fi.muni.ib053_house.settings.Commands;
 import static cz.fi.muni.ib053_house.settings.Settings.runtimeSettings;
 import cz.fi.muni.ib053_house.tcp.Communicator;
 import java.net.URL;
+import java.util.Random;
 import java.util.ResourceBundle;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
 
@@ -85,7 +88,7 @@ public class HouseController {
                 AnchorPane.setTopAnchor(brdrPn, 0.0);
                 instance = this;
 
-               // comm = new Communicator();
+              //  comm = new Communicator();
          //       Rectangle rect = new Rectangle(500,800,100,50);
          //       rect.setStroke(Color.BLUE);
          //       canvas.getChildren().add(rect);
@@ -94,7 +97,61 @@ public class HouseController {
                 canvas.getChildren().addAll(house.getAllElementsUnmodifiable());
                 
             }
+              @FXML
+    void stopClicked(MouseEvent event) {
+                Platform.runLater(new Runnable() {
+                    @Override public void run() {
+                                house.setElevatorStatus(ElevatorStatus.STILL);
+                    }
+                });
+    }
+      @FXML
+    void indikaceClicked(MouseEvent event) {
+        Platform.runLater(new Runnable() {
+                    @Override public void run() {
+                         int pick = new Random().nextInt(Commands.IndikaceStav.values().length);
+                        Commands.IndikaceStav stav = Commands.IndikaceStav.values()[pick];
+                        indikace(new Random().nextInt(house.getFloorsCount()), stav);
+                    }
+                }); 
+    }
+
+  @FXML
+    void signalClicked(MouseEvent event) {
+        Platform.runLater(new Runnable() {
+                    @Override public void run() {
+                         int pick = new Random().nextInt(Commands.PanelSmer.values().length);
+                        Commands.PanelSmer smer = Commands.PanelSmer.values()[pick];
+                        panel(smer, pick);
+                    }
+                }); 
+    }
+
             public void jizda(Commands.JizdaSmer smer){
+                Platform.runLater(new Runnable() {
+                    @Override public void run() {
+                        switch(smer){
+                            case D:
+                                house.setElevatorStatus(ElevatorStatus.DOWN_NORMAL);
+                                break;
+                            case N:
+                                house.setElevatorStatus(ElevatorStatus.UP_NORMAL);
+                                break;
+                            case P:
+                                if(house.getElevatorStatus().equals(ElevatorStatus.DOWN_NORMAL)){
+                                    house.setElevatorStatus(ElevatorStatus.DOWN_SLOW);
+                                }
+                                if(house.getElevatorStatus().equals(ElevatorStatus.UP_NORMAL)){
+                                    house.setElevatorStatus(ElevatorStatus.UP_SLOW);
+                                }
+                                break;
+                            case O:
+                                house.setElevatorStatus(ElevatorStatus.STILL);
+                                break;
+                        }
+                        house.moveElevator();
+                    }
+                });
                 final String message = "Dum by mel naanimovat vytah smerem: " + smer + "\n";
                 addText(txtAreaOutput, message);
                 
@@ -103,18 +160,51 @@ public class HouseController {
             
             public void indikace(int patro, Commands.IndikaceStav stav){
                 final String message ="Dum by mel indikovat vytah v patre: " + patro + " ve stavu: " + stav+ "\n";
+
+                    Platform.runLater(new Runnable() {
+                    @Override public void run() {
+                        house.getFloors().get(patro).indikace(stav);
+                    }
+                });
                 addText(txtAreaOutput, message);
                 
                 
             }
             
             public void panel(Commands.PanelSmer smer, int patro){
-                
-                final String message ="Dum by mel blikat panely smer: " + smer + " k patru: " + patro+ "\n";
-                addText(txtAreaOutput, message);
+                 Platform.runLater(new Runnable() {
+                    @Override public void run() {
+                        String text = "";
+                        switch(smer){
+                            case D:
+                                text += "\u2193"; //sipka dolu
+                                break;
+                            case K:
+                                text += "KLID";
+                                break;
+                            case N:
+                                text += "\u2191"; //sipka nahoru
+                                break;
+                            case S:
+                                text += "STOJI";
+                                break;
+                        }
+                        text += "\t" +patro;
+                        for(FloorGuiElements floor: house.getFloors()){
+                            floor.getStatus().setText(text);
+                        }
+                    }
+                 });
+                 final String message ="Dum by mel blikat panely smer: " + smer + " k patru: " + patro+ "\n";
+                 addText(txtAreaOutput, message);
             }
             private void addText(TextArea textArea, String message) {
-                textArea.setText(message);
+                System.out.println(message);
+                Platform.runLater(new Runnable() {
+                    @Override public void run() {
+                        textArea.appendText(message);
+                    }
+                });
                 
             }
             

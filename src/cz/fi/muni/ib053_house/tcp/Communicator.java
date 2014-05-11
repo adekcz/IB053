@@ -55,7 +55,7 @@ public class Communicator {
                                     houseController.indikace(Integer.parseInt(command[1]), Commands.IndikaceStav.valueOf(command[2]));
                                     break;
                                 case JIZDA:
-                                    houseController.jizda(Commands.JizdaSmer.valueOf(command[1]));
+                                    houseController.jizda(Commands.JizdaSmer.getEnum(command[1]));
                                     break;
                                 case PANEL:
                                     houseController.panel(Commands.PanelSmer.valueOf(command[1]), Integer.parseInt(command[2]));

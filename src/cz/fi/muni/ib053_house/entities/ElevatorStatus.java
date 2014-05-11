@@ -12,30 +12,7 @@ import javafx.animation.Animation.Status;
  *
  * @author Michal Keda
  */
-public class ElevatorStatus {
-    private FloorGuiElements destinationFloor;
-    private Status status;
-
-    public ElevatorStatus(FloorGuiElements destinationFloor, Status status) {
-        this.destinationFloor = destinationFloor;
-        this.status = status;
-    }
-
-    public FloorGuiElements getDestinationFloor() {
-        return destinationFloor;
-    }
-
-    public void setDestinationFloor(FloorGuiElements destinationFloor) {
-        this.destinationFloor = destinationFloor;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
-    }
-    
-
+//duplicate from commands enum
+public enum ElevatorStatus {
+   DOWN_NORMAL, DOWN_SLOW, STILL, UP_SLOW, UP_NORMAL 
 }

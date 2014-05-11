@@ -4,6 +4,7 @@
  */
 package cz.fi.muni.ib053_house.entities;
 
+import cz.fi.muni.ib053_house.settings.Commands;
 import cz.fi.muni.ib053_house.settings.FloorType;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +48,7 @@ public class HouseGuiElements {
     private Rectangle engine;
     private Circle lastSensor;
     private Rectangle elevator;
-    private ElevatorStatus elevatorStatus;
+    private volatile ElevatorStatus elevatorStatus;
 
    // nastupiste - tlacitko - indikace stavu vytahu
     // motor,
@@ -62,12 +63,56 @@ public class HouseGuiElements {
         return n.getY()+n.getHeight()/2;
     }
 
+    public void moveElevator(){
+        System.out.println("should be moving");
+        double deltaY = 0;
+        switch(elevatorStatus){
+            case DOWN_NORMAL:
+                deltaY = 40;
+                break;
+            case DOWN_SLOW:
+                deltaY = 20;
+                break;
+            case UP_NORMAL:
+                deltaY = -40;
+                break;
+            case UP_SLOW:
+                deltaY = -20;
+                break;
+            case STILL:
+                return;
+        }
+
+
+            
+            Path path = new Path();
+            path.getElements().add(new MoveTo(getXForAnimation(elevator), getYForAnimation(elevator)));
+            path.getElements().add(new LineTo(getXForAnimation(elevator), getYForAnimation(elevator)+deltaY));
+            PathTransition pathTransition = new PathTransition();
+            pathTransition.setDuration(Duration.millis(1000));
+            pathTransition.setPath(path);
+            pathTransition.setNode(elevator);
+            pathTransition.setOrientation(PathTransition.OrientationType.NONE);
+            pathTransition.setCycleCount(1);
+            pathTransition.play();
+
+            final double tempDeltaY = deltaY;
+            pathTransition.setOnFinished(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    elevator.setY(elevator.getY()+tempDeltaY);
+                    moveElevator();
+                }
+            });
+
+            System.out.println("should be stopped");
+
+    }
     public void moveElevatorTo(FloorGuiElements floor){
         System.out.println("should be moving");
         double origin = getXForAnimation(elevator);
         double destination = getXForAnimation(shaft);
         double totalDestination = origin+destination;
-        for(int i = (int) origin; i<totalDestination; i++){
             Path path = new Path();
             path.getElements().add(new MoveTo(origin, getYForAnimation(elevator)));
             path.getElements().add(new LineTo(destination, getYForAnimation(floor.getOutline())));
@@ -86,7 +131,6 @@ public class HouseGuiElements {
                 }
             });
 
-            }
             System.out.println("should be stopped");
         }
      public List<Node> getAllElementsUnmodifiable() {
@@ -111,17 +155,19 @@ public class HouseGuiElements {
         }
         this.shaft = new Rectangle(GENERAL_MARGIN, getHeight() - GENERAL_MARGIN  - (numberOfFloors-1)*FLOOR_HEIGHT, GENERAL_WIDTH, numberOfFloors*FLOOR_HEIGHT);
         this.elevator = new Rectangle(GENERAL_MARGIN, getHeight() - GENERAL_MARGIN , GENERAL_WIDTH, FLOOR_HEIGHT);
-        this.elevatorStatus = new ElevatorStatus(floors.get(0), Animation.Status.STOPPED);
+        this.elevatorStatus = elevatorStatus.STILL;
          this.lastSensor =  new Circle(GENERAL_MARGIN + GENERAL_WIDTH, GENERAL_MARGIN+FLOOR_HEIGHT, 5);
 
-        shaft.setStroke(Color.ANTIQUEWHITE);
-        elevator.setStroke(Color.AQUAMARINE);
-        shaft.setOpacity(50);
+         //you should style elements by CSS
+        shaft.setStroke(Color.BLACK);
+        shaft.setFill(Color.WHITE);
+        elevator.setOpacity(0.1);
+
 
         for(Node node: getAllElementsUnmodifiable()){
             if(node instanceof Shape){
                 Shape shape = (Shape) node;
-                shape.setOpacity(0.1);
+                //shape.setOpacity(0.1);
             }
         }
     }
@@ -175,6 +221,15 @@ public class HouseGuiElements {
     public Rectangle getElevator() {
         return elevator;
     }
+
+    public ElevatorStatus getElevatorStatus() {
+        return elevatorStatus;
+    }
+
+    public void setElevatorStatus(ElevatorStatus elevatorStatus) {
+        this.elevatorStatus = elevatorStatus;
+    }
+
 
     
 }

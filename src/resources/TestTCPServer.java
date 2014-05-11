@@ -19,10 +19,11 @@ public class TestTCPServer {
 			TCPServer listener = new TCPServer(PORT);
 			TCPConnection connection = listener.waitForConnection();
 			connection.write("INDIKACE;3;N\n");
-			connection.write("PANEL;D;2\n");
+			connection.write("JIZDA;N\n");
+			connection.write("JIZDA;0\n");
 			while (true) {
                 try {
-                    Thread.sleep(150);
+                    Thread.sleep(5000);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(TestTCPServer.class.getName()).log(Level.SEVERE, null, ex);
                 }
