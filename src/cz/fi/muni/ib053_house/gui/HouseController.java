@@ -20,8 +20,8 @@ import javafx.scene.shape.Rectangle;
 
 
 public class HouseController {
-    public Communicator comm; 
-    public HouseGuiElements house = new HouseGuiElements(2, 5);
+    private HouseGuiElements house = new HouseGuiElements(2, 5);
+
 
     @FXML
     private ResourceBundle resources;
@@ -60,10 +60,20 @@ public class HouseController {
     private TextArea txtAreaOutput;
     @FXML
     private BorderPane brdrPn;
+
     private static HouseController instance;
+    private Communicator comm; 
 
     public static HouseController getInstance() {
         return instance;
+    }
+
+    public Communicator getCommunicator() {
+        return comm;
+    }
+
+    public HouseGuiElements getHouse() {
+        return house;
     }
     
     @FXML
@@ -88,7 +98,7 @@ public class HouseController {
                 AnchorPane.setTopAnchor(brdrPn, 0.0);
                 instance = this;
 
-              //  comm = new Communicator();
+                comm = new Communicator();
          //       Rectangle rect = new Rectangle(500,800,100,50);
          //       rect.setStroke(Color.BLUE);
          //       canvas.getChildren().add(rect);
@@ -101,7 +111,7 @@ public class HouseController {
     void stopClicked(MouseEvent event) {
                 Platform.runLater(new Runnable() {
                     @Override public void run() {
-                                house.setElevatorStatus(ElevatorStatus.UP_SLOW);
+                                house.setElevatorStatus(ElevatorStatus.STILL);
                     }
                 });
     }

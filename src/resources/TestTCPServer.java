@@ -18,9 +18,8 @@ public class TestTCPServer {
 
 			TCPServer listener = new TCPServer(PORT);
 			TCPConnection connection = listener.waitForConnection();
+            //should get from server...
 			connection.write("INDIKACE;3;N\n");
-			connection.write("JIZDA;N\n");
-			connection.write("JIZDA;0\n");
 			while (true) {
                 try {
                     Thread.sleep(5000);

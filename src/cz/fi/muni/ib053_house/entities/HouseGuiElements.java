@@ -4,7 +4,9 @@
  */
 package cz.fi.muni.ib053_house.entities;
 
+import cz.fi.muni.ib053_house.gui.HouseController;
 import cz.fi.muni.ib053_house.settings.Commands;
+import cz.fi.muni.ib053_house.settings.Events;
 import cz.fi.muni.ib053_house.settings.FloorType;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,7 +88,7 @@ private void checkBounds(Shape elevator, List<FloorGuiElements> floors) {
   }
 }
     public void moveElevator(){
-       System.out.println("in "+ elevator.getY());
+       //System.out.println("in "+ elevator.getY());
         double deltaY = 2;
         double duration = 0;
         switch(elevatorStatus){
@@ -105,8 +107,19 @@ private void checkBounds(Shape elevator, List<FloorGuiElements> floors) {
                 deltaY *= -1;
                 break;
             case STILL:
+                
+                //(Y vytahu - Y nejvyssiho patra) % vyska patra
+                int modularDistanceFromFloor = ((int) Math.abs(elevator.getY()-floors.get(floors.size()-1).getOutline().getY()))%FLOOR_HEIGHT;
+
+                if(modularDistanceFromFloor<5 || FLOOR_HEIGHT-modularDistanceFromFloor < 5){
+                      HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.S);
+                }else{
+                      HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.P);
+
+                }
                 return;
         }
+        
 
 
             
@@ -127,18 +140,18 @@ private void checkBounds(Shape elevator, List<FloorGuiElements> floors) {
                 @Override
                 public void handle(ActionEvent event) {
                     checkBounds(elevator, floors);
-                   System.out.println("finishIn: "+ elevator.getY());
+                   //System.out.println("finishIn: "+ elevator.getY());
                     elevator.setY(elevator.getY()+tempDeltaY);
-                   System.out.println("finishOut "+ elevator.getY());
+                   //System.out.println("finishOut "+ elevator.getY());
                     moveElevator();
                 }
             });
 
-            System.out.println("should be stopped");
+            //System.out.println("should be stopped");
 
     }
     public void moveElevatorTo(FloorGuiElements floor){
-        System.out.println("should be moving");
+        //System.out.println("should be moving");
         double origin = getXForAnimation(elevator);
         double destination = getXForAnimation(shaft);
         double totalDestination = origin+destination;
@@ -160,7 +173,7 @@ private void checkBounds(Shape elevator, List<FloorGuiElements> floors) {
                 }
             });
 
-            System.out.println("should be stopped");
+            //System.out.println("should be stopped");
         }
      public List<Node> getAllElementsUnmodifiable() {
         List<Node> temp = new ArrayList<>();

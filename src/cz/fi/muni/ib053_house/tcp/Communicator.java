@@ -87,6 +87,7 @@ public class Communicator {
     }
 
     public void pohyb(Events.Pohyb state) {
+        System.out.println(Events.POHYB + ";" + state);
         sendMessage(Events.POHYB + ";" + state);
 
     }

@@ -65,8 +65,9 @@ public class FloorGuiElements {
  
             public void handle(MouseEvent event) {
                 System.out.println(floorNumber + " was clicked");
-                HouseController.getInstance().house.setElevatorStatus(ElevatorStatus.UP_NORMAL);
-                HouseController.getInstance().house.moveElevator();
+                HouseController.getInstance().getHouse().setElevatorStatus(ElevatorStatus.UP_NORMAL);
+                HouseController.getInstance().getHouse().moveElevator();
+                HouseController.getInstance().getCommunicator().tlacitko(floorNumber);
             }
         });
         
