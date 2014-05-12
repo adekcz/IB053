@@ -20,6 +20,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
@@ -37,6 +38,7 @@ public class FloorGuiElements {
     private final Rectangle statusPanel;
     private Text status;
     private List<Node> allElements;
+    private List<Shape> sensors;
 
     public FloorGuiElements(Rectangle outline, int floorNumber, FloorType type) {
         this.floorNumber = floorNumber;
@@ -59,7 +61,6 @@ public class FloorGuiElements {
         this.button = new Rectangle(outline.getX()+10, outline.getY()+ outline.getHeight()/2, outline.getHeight()/6,outline.getHeight()/6);
         this.button.setFill(Color.RED);
 
-        final FloorGuiElements thiss = this;
         this.button.setOnMouseClicked(new EventHandler<MouseEvent>() {
  
             public void handle(MouseEvent event) {
@@ -69,20 +70,23 @@ public class FloorGuiElements {
             }
         });
         
-         this.status = new Text(outline.getX()+30 + this.button.getWidth(), outline.getY()+ outline.getHeight()/2 + this.button.getHeight(),"ZACATEK");
+         this.status = new Text(outline.getX()+40 + this.button.getWidth(), outline.getY()+ outline.getHeight()/2 + this.button.getHeight(),"ZACATEK");
         this.statusPanel = new Rectangle(outline.getX()+30, outline.getY()+ outline.getHeight()/2, outline.getHeight()/6,outline.getHeight()/6);
 
         this.statusPanel.setFill(Color.WHITE);
         this.statusPanel.setStroke(Color.BLACK);
         
         allElements = new ArrayList<>();
+        sensors = new ArrayList<>();
+
         allElements.add(outline);
         allElements.add(button);
         allElements.add(statusPanel);
         allElements.add(status);
-        allElements.add(middleSensor);
-        allElements.add(bottomSensor);
-        allElements.add(topSensor);
+        sensors.add(middleSensor);
+        sensors.add(bottomSensor);
+        sensors.add(topSensor);
+        allElements.addAll(sensors);
         topSensor.toFront();
         middleSensor.toFront();
     }
@@ -123,7 +127,7 @@ public class FloorGuiElements {
         }
         switch(stav){
             case B:
-                 ft = new FillTransition(Duration.millis(1000), this.statusPanel, Color.WHITE, Color.GREEN);
+                 ft = new FillTransition(Duration.millis(1000), this.statusPanel, Color.WHITE, Color.GREENYELLOW);
                  ft.setCycleCount(Animation.INDEFINITE);
                  ft.setAutoReverse(true);
              
@@ -133,7 +137,7 @@ public class FloorGuiElements {
                 this.statusPanel.setFill(Color.WHITE);
                 break;
             case S:
-                this.statusPanel.setFill(Color.GREEN);
+                this.statusPanel.setFill(Color.GREENYELLOW);
                 break;
         }
     }
@@ -141,6 +145,11 @@ public class FloorGuiElements {
 
 public Text getStatus() {
         return status;
+    }
+
+    public Iterable<Shape> getSensors() {
+        return Collections.unmodifiableList(sensors);
+        
     }
 }
 

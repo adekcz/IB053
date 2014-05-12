@@ -62,22 +62,47 @@ public class HouseGuiElements {
     public static double getYForAnimation(Rectangle n){
         return n.getY()+n.getHeight()/2;
     }
+private void checkBounds(Shape elevator, List<FloorGuiElements> floors) {
+  boolean collisionDetected = false;
+  for(FloorGuiElements floor: floors){
+      for (Shape static_bloc : floor.getSensors()) {
+          if(static_bloc==null){
+              continue;
+          }
+        if (static_bloc != elevator) {
 
+          if (elevator.getBoundsInParent().intersects(static_bloc.getBoundsInParent())) {
+                collisionDetected = true;
+                  static_bloc.setFill(Color.PURPLE);
+          }
+        }
+      }
+  }
+
+  if (collisionDetected) {
+    elevator.setFill(Color.BLUE);
+  } else {
+    elevator.setFill(Color.GREEN);
+  }
+}
     public void moveElevator(){
-        System.out.println("should be moving");
-        double deltaY = 0;
+       System.out.println("in "+ elevator.getY());
+        double deltaY = 2;
+        double duration = 0;
         switch(elevatorStatus){
             case DOWN_NORMAL:
-                deltaY = 40;
+                duration= 10;
                 break;
             case DOWN_SLOW:
-                deltaY = 20;
+                duration= 50;
                 break;
             case UP_NORMAL:
-                deltaY = -40;
+                duration= 10;
+                deltaY *= -1;
                 break;
             case UP_SLOW:
-                deltaY = -20;
+                duration= 50;
+                deltaY *= -1;
                 break;
             case STILL:
                 return;
@@ -89,7 +114,8 @@ public class HouseGuiElements {
             path.getElements().add(new MoveTo(getXForAnimation(elevator), getYForAnimation(elevator)));
             path.getElements().add(new LineTo(getXForAnimation(elevator), getYForAnimation(elevator)+deltaY));
             PathTransition pathTransition = new PathTransition();
-            pathTransition.setDuration(Duration.millis(1000));
+            pathTransition.setDuration(Duration.millis(duration));
+            //pathTransition.setDelay(Duration.millis(300));
             pathTransition.setPath(path);
             pathTransition.setNode(elevator);
             pathTransition.setOrientation(PathTransition.OrientationType.NONE);
@@ -100,7 +126,10 @@ public class HouseGuiElements {
             pathTransition.setOnFinished(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
+                    checkBounds(elevator, floors);
+                   System.out.println("finishIn: "+ elevator.getY());
                     elevator.setY(elevator.getY()+tempDeltaY);
+                   System.out.println("finishOut "+ elevator.getY());
                     moveElevator();
                 }
             });

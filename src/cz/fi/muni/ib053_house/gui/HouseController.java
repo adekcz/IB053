@@ -101,7 +101,7 @@ public class HouseController {
     void stopClicked(MouseEvent event) {
                 Platform.runLater(new Runnable() {
                     @Override public void run() {
-                                house.setElevatorStatus(ElevatorStatus.STILL);
+                                house.setElevatorStatus(ElevatorStatus.UP_SLOW);
                     }
                 });
     }
@@ -174,7 +174,7 @@ public class HouseController {
             public void panel(Commands.PanelSmer smer, int patro){
                  Platform.runLater(new Runnable() {
                     @Override public void run() {
-                        String text = "";
+                        String text = (patro<10? "0"+patro : patro) + "\t";
                         switch(smer){
                             case D:
                                 text += "\u2193"; //sipka dolu
@@ -189,7 +189,6 @@ public class HouseController {
                                 text += "STOJI";
                                 break;
                         }
-                        text += "\t" +patro;
                         for(FloorGuiElements floor: house.getFloors()){
                             floor.getStatus().setText(text);
                         }
