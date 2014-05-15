@@ -122,17 +122,21 @@ public class HouseGuiElements {
         switch(elevatorStatus){
             case DOWN_NORMAL:
                 duration= 10;
+                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                 break;
             case DOWN_SLOW:
                 duration= 50;
+                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                 break;
             case UP_NORMAL:
                 duration= 10;
                 deltaY *= -1;
+                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                 break;
             case UP_SLOW:
                 duration= 50;
                 deltaY *= -1;
+                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                 break;
             case STILL:
                 

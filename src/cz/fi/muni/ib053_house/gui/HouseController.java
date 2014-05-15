@@ -4,6 +4,7 @@ import cz.fi.muni.ib053_house.entities.ElevatorStatus;
 import cz.fi.muni.ib053_house.entities.FloorGuiElements;
 import cz.fi.muni.ib053_house.entities.HouseGuiElements;
 import cz.fi.muni.ib053_house.settings.Commands;
+import cz.fi.muni.ib053_house.settings.Events;
 import static cz.fi.muni.ib053_house.settings.Settings.runtimeSettings;
 import cz.fi.muni.ib053_house.tcp.Communicator;
 import java.net.URL;
@@ -162,22 +163,27 @@ public class HouseController {
                 switch (smer) {
                     case D:
                         house.setElevatorStatus(ElevatorStatus.DOWN_NORMAL);
+                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                         break;
                     case N:
                         house.setElevatorStatus(ElevatorStatus.UP_NORMAL);
+                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                         break;
                     case P:
                         if (house.getElevatorStatus().equals(ElevatorStatus.DOWN_NORMAL)) {
                             house.setElevatorStatus(ElevatorStatus.DOWN_SLOW);
+                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                         }
                         if (house.getElevatorStatus().equals(ElevatorStatus.UP_NORMAL)) {
                             house.setElevatorStatus(ElevatorStatus.UP_SLOW);
+                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                         }
                         break;
                     case O:
                         house.setElevatorStatus(ElevatorStatus.STILL);
                         break;
                 }
+
                 house.moveElevator();
             }
         });
