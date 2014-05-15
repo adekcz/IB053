@@ -46,7 +46,7 @@ public enum Commands {
     public static enum PanelSmer {
         N,//nahoru
         D,//dolu
-        S,//stoji
-        K //v klidu
+        S,//stoji //dvere otevreny
+        K //v klidu //dvere zavreny asi
     }
 }

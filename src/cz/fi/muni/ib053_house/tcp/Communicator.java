@@ -14,6 +14,7 @@ import cz.fi.muni.ib053_house.settings.Events;
 import static cz.fi.muni.ib053_house.settings.Settings.runtimeSettings;
 import java.io.IOException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,7 +61,9 @@ public class Communicator {
                                 case PANEL:
                                     houseController.panel(Commands.PanelSmer.valueOf(command[1]), Integer.parseInt(command[2]));
                                     break;
+
                             }
+                            System.out.println("RECIEVED: " + Arrays.toString(command));
                         }
                     } catch (IOException ex) {
                         Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
@@ -74,6 +77,7 @@ public class Communicator {
 
     //will be private
     public void sendMessage(String str) {
+        System.out.println("SENDING: " + str);
         try {
             transmitter.write(str + "\n");
         } catch (IOException ex) {
@@ -87,7 +91,6 @@ public class Communicator {
     }
 
     public void pohyb(Events.Pohyb state) {
-        System.out.println(Events.POHYB + ";" + state);
         sendMessage(Events.POHYB + ";" + state);
 
     }

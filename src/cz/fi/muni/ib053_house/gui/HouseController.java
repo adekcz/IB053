@@ -18,10 +18,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.shape.Rectangle;
 
-
 public class HouseController {
-    private HouseGuiElements house = new HouseGuiElements(2, 5);
 
+    private HouseGuiElements house;
 
     @FXML
     private ResourceBundle resources;
@@ -62,7 +61,7 @@ public class HouseController {
     private BorderPane brdrPn;
 
     private static HouseController instance;
-    private Communicator comm; 
+    private Communicator comm;
 
     public static HouseController getInstance() {
         return instance;
@@ -75,154 +74,165 @@ public class HouseController {
     public HouseGuiElements getHouse() {
         return house;
     }
-    
+
     @FXML
-            void initialize() {
-                assert elevator != null : "fx:id=\"elevator\" was not injected: check your FXML file 'HouseFxml.fxml'.";
-                assert helloLabel != null : "fx:id=\"helloLabel\" was not injected: check your FXML file 'HouseFxml.fxml'.";
-                assert lblControlUnitPort != null : "fx:id=\"lblControlUnitPort\" was not injected: check your FXML file 'HouseFxml.fxml'.";
-                assert lblCurrentFloor != null : "fx:id=\"lblCurrentFloor\" was not injected: check your FXML file 'HouseFxml.fxml'.";
-                assert lblFloorCount != null : "fx:id=\"lblFloorCount\" was not injected: check your FXML file 'HouseFxml.fxml'.";
-                assert lblGroundZero != null : "fx:id=\"lblGroundZero\" was not injected: check your FXML file 'HouseFxml.fxml'.";
-                assert lblServerUrl != null : "fx:id=\"lblServerUrl\" was not injected: check your FXML file 'HouseFxml.fxml'.";
-                assert txtAreaOutput != null : "fx:id=\"txtAreaOutput\" was not injected: check your FXML file 'HouseFxml.fxml'.";
-                
-                AnchorPane.setBottomAnchor(canvas, 0.0);
-                AnchorPane.setLeftAnchor(canvas, 0.0);
-                AnchorPane.setRightAnchor(canvas, 0.0);
-                AnchorPane.setTopAnchor(canvas, 0.0);
+    void initialize() {
+        assert elevator != null : "fx:id=\"elevator\" was not injected: check your FXML file 'HouseFxml.fxml'.";
+        assert helloLabel != null : "fx:id=\"helloLabel\" was not injected: check your FXML file 'HouseFxml.fxml'.";
+        assert lblControlUnitPort != null : "fx:id=\"lblControlUnitPort\" was not injected: check your FXML file 'HouseFxml.fxml'.";
+        assert lblCurrentFloor != null : "fx:id=\"lblCurrentFloor\" was not injected: check your FXML file 'HouseFxml.fxml'.";
+        assert lblFloorCount != null : "fx:id=\"lblFloorCount\" was not injected: check your FXML file 'HouseFxml.fxml'.";
+        assert lblGroundZero != null : "fx:id=\"lblGroundZero\" was not injected: check your FXML file 'HouseFxml.fxml'.";
+        assert lblServerUrl != null : "fx:id=\"lblServerUrl\" was not injected: check your FXML file 'HouseFxml.fxml'.";
+        assert txtAreaOutput != null : "fx:id=\"txtAreaOutput\" was not injected: check your FXML file 'HouseFxml.fxml'.";
 
-                AnchorPane.setBottomAnchor(brdrPn, 0.0);
-                AnchorPane.setLeftAnchor(brdrPn, 0.0);
-                AnchorPane.setRightAnchor(brdrPn, 0.0);
-                AnchorPane.setTopAnchor(brdrPn, 0.0);
-                instance = this;
+        AnchorPane.setBottomAnchor(canvas, 0.0);
+        AnchorPane.setLeftAnchor(canvas, 0.0);
+        AnchorPane.setRightAnchor(canvas, 0.0);
+        AnchorPane.setTopAnchor(canvas, 0.0);
 
-                comm = new Communicator();
-         //       Rectangle rect = new Rectangle(500,800,100,50);
-         //       rect.setStroke(Color.BLUE);
-         //       canvas.getChildren().add(rect);
+        AnchorPane.setBottomAnchor(brdrPn, 0.0);
+        AnchorPane.setLeftAnchor(brdrPn, 0.0);
+        AnchorPane.setRightAnchor(brdrPn, 0.0);
+        AnchorPane.setTopAnchor(brdrPn, 0.0);
+        instance = this;
 
-                canvas.setPrefSize(house.getWidth(), house.getHeight());
-                canvas.getChildren().addAll(house.getAllElementsUnmodifiable());
-                
-            }
-              @FXML
-    void stopClicked(MouseEvent event) {
-                Platform.runLater(new Runnable() {
-                    @Override public void run() {
-                                house.setElevatorStatus(ElevatorStatus.STILL);
-                    }
-                });
+        comm = new Communicator();
+        house = new HouseGuiElements(runtimeSettings.getGroundZero(), runtimeSettings.getFloorCount());
+                        //       Rectangle rect = new Rectangle(500,800,100,50);
+        //       rect.setStroke(Color.BLUE);
+        //       canvas.getChildren().add(rect);
+
+        canvas.setPrefSize(house.getWidth(), house.getHeight());
+        canvas.getChildren().addAll(house.getAllElementsUnmodifiable());
+
     }
-      @FXML
+
+    @FXML
+    void stopClicked(MouseEvent event) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                house.setElevatorStatus(ElevatorStatus.STILL);
+            }
+        });
+    }
+
+    @FXML
     void indikaceClicked(MouseEvent event) {
         Platform.runLater(new Runnable() {
-                    @Override public void run() {
-                         int pick = new Random().nextInt(Commands.IndikaceStav.values().length);
-                        Commands.IndikaceStav stav = Commands.IndikaceStav.values()[pick];
-                        indikace(new Random().nextInt(house.getFloorsCount()), stav);
-                    }
-                }); 
+            @Override
+            public void run() {
+                int pick = new Random().nextInt(Commands.IndikaceStav.values().length);
+                Commands.IndikaceStav stav = Commands.IndikaceStav.values()[pick];
+                indikace(new Random().nextInt(house.getFloorsCount()), stav);
+            }
+        });
     }
 
-  @FXML
+    @FXML
     void signalClicked(MouseEvent event) {
         Platform.runLater(new Runnable() {
-                    @Override public void run() {
-                         int pick = new Random().nextInt(Commands.PanelSmer.values().length);
-                        Commands.PanelSmer smer = Commands.PanelSmer.values()[pick];
-                        panel(smer, pick);
-                    }
-                }); 
+            @Override
+            public void run() {
+                int pick = new Random().nextInt(Commands.PanelSmer.values().length);
+                Commands.PanelSmer smer = Commands.PanelSmer.values()[pick];
+                panel(smer, pick);
+            }
+        });
     }
 
-            public void jizda(Commands.JizdaSmer smer){
-                Platform.runLater(new Runnable() {
-                    @Override public void run() {
-                        switch(smer){
-                            case D:
-                                house.setElevatorStatus(ElevatorStatus.DOWN_NORMAL);
-                                break;
-                            case N:
-                                house.setElevatorStatus(ElevatorStatus.UP_NORMAL);
-                                break;
-                            case P:
-                                if(house.getElevatorStatus().equals(ElevatorStatus.DOWN_NORMAL)){
-                                    house.setElevatorStatus(ElevatorStatus.DOWN_SLOW);
-                                }
-                                if(house.getElevatorStatus().equals(ElevatorStatus.UP_NORMAL)){
-                                    house.setElevatorStatus(ElevatorStatus.UP_SLOW);
-                                }
-                                break;
-                            case O:
-                                house.setElevatorStatus(ElevatorStatus.STILL);
-                                break;
-                        }
-                        house.moveElevator();
-                    }
-                });
-                final String message = "Dum by mel naanimovat vytah smerem: " + smer + "\n";
-                addText(txtAreaOutput, message);
-                
-                
-            }
-            
-            public void indikace(int patro, Commands.IndikaceStav stav){
-                final String message ="Dum by mel indikovat vytah v patre: " + patro + " ve stavu: " + stav+ "\n";
+    public void indikace(int patro, Commands.IndikaceStav stav) {
+        final String message = "Dum by mel indikovat vytah v patre: " + patro + " ve stavu: " + stav + "\n";
 
-                    Platform.runLater(new Runnable() {
-                    @Override public void run() {
-                        house.getFloors().get(patro).indikace(stav);
-                    }
-                });
-                addText(txtAreaOutput, message);
-                
-                
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                house.getFloors().get(patro).indikace(stav);
             }
-            
-            public void panel(Commands.PanelSmer smer, int patro){
-                 Platform.runLater(new Runnable() {
-                    @Override public void run() {
-                        String text = (patro<10? "0"+patro : patro) + "\t";
-                        switch(smer){
-                            case D:
-                                text += "\u2193"; //sipka dolu
-                                break;
-                            case K:
-                                text += "KLID";
-                                break;
-                            case N:
-                                text += "\u2191"; //sipka nahoru
-                                break;
-                            case S:
-                                text += "STOJI";
-                                break;
+        });
+        addText(txtAreaOutput, message);
+
+    }
+
+    public void jizda(Commands.JizdaSmer smer) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                switch (smer) {
+                    case D:
+                        house.setElevatorStatus(ElevatorStatus.DOWN_NORMAL);
+                        break;
+                    case N:
+                        house.setElevatorStatus(ElevatorStatus.UP_NORMAL);
+                        break;
+                    case P:
+                        if (house.getElevatorStatus().equals(ElevatorStatus.DOWN_NORMAL)) {
+                            house.setElevatorStatus(ElevatorStatus.DOWN_SLOW);
                         }
-                        for(FloorGuiElements floor: house.getFloors()){
-                            floor.getStatus().setText(text);
+                        if (house.getElevatorStatus().equals(ElevatorStatus.UP_NORMAL)) {
+                            house.setElevatorStatus(ElevatorStatus.UP_SLOW);
                         }
-                    }
-                 });
-                 final String message ="Dum by mel blikat panely smer: " + smer + " k patru: " + patro+ "\n";
-                 addText(txtAreaOutput, message);
+                        break;
+                    case O:
+                        house.setElevatorStatus(ElevatorStatus.STILL);
+                        break;
+                }
+                house.moveElevator();
             }
-            private void addText(TextArea textArea, String message) {
-                System.out.println(message);
-                Platform.runLater(new Runnable() {
-                    @Override public void run() {
-                        textArea.appendText(message);
-                    }
-                });
-                
+        });
+        final String message = "Dum by mel naanimovat vytah smerem: " + smer + "\n";
+        addText(txtAreaOutput, message);
+
+    }
+
+    public void panel(Commands.PanelSmer smer, int patro) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                String text = (patro < 10 ? "0" + patro : patro) + "\t";
+                house.controlDoors(smer);
+                switch (smer) {
+                    case D:
+                        text += "\u2193"; //sipka dolu
+                        break;
+                    case K:
+                        text += "KLID";
+                        
+                        break;
+                    case N:
+                        text += "\u2191"; //sipka nahoru
+                        break;
+                    case S:
+                        text += "STOJI";
+                        break;
+                }
+                for (FloorGuiElements floor : house.getFloors()) {
+                    floor.getStatus().setText(text);
+                }
             }
-            
-            public void setSettingsArea() {
-                lblControlUnitPort.setText(runtimeSettings.getControlUnitPort() + "");
-                lblFloorCount.setText(runtimeSettings.getFloorCount()+ "");
-                lblGroundZero.setText(runtimeSettings.getGroundZero()+ "");
-                lblServerUrl.setText(runtimeSettings.getServerUrl()+ "");
-                System.out.println("should be set");
+        });
+        final String message = "Dum by mel blikat panely smer: " + smer + " k patru: " + patro + "\n";
+        addText(txtAreaOutput, message);
+    }
+
+    private void addText(TextArea textArea, String message) {
+        System.out.println(message);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                textArea.appendText(message);
             }
-            
+        });
+
+    }
+
+    public void setSettingsArea() {
+        lblControlUnitPort.setText(runtimeSettings.getControlUnitPort() + "");
+        lblFloorCount.setText(runtimeSettings.getFloorCount() + "");
+        lblGroundZero.setText(runtimeSettings.getGroundZero() + "");
+        lblServerUrl.setText(runtimeSettings.getServerUrl() + "");
+        System.out.println("should be set");
+    }
+
 }
