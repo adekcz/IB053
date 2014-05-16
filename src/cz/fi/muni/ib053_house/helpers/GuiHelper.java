@@ -15,6 +15,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
+
+
+
 /**
  *
  * @author Michal Keda
@@ -22,18 +25,19 @@ import javafx.scene.shape.Rectangle;
 public class GuiHelper {
        public static boolean checkCollision(ElevatorStatus elevatorStatus, Rectangle s1, Circle s2) {
         if (elevatorStatus.equals(ElevatorStatus.UP_NORMAL) || elevatorStatus.equals(ElevatorStatus.UP_SLOW)) {
-            if (Math.abs(s1.getY() - s2.getCenterY()) < 3) {
+            if (Math.abs(s1.getY() - s2.getCenterY()) < 10) {
                 return true;
             }
         }
         if (elevatorStatus.equals(ElevatorStatus.DOWN_NORMAL) || elevatorStatus.equals(ElevatorStatus.DOWN_SLOW)) {
-            if (Math.abs(s1.getY() + s1.getHeight() - s2.getCenterY()) < 3) {
+            if (Math.abs(s1.getY() + s1.getHeight() - s2.getCenterY()) < 10) {
                 return true;
             }
         }
         return false;
     } 
-           public static void checkBounds(ElevatorStatus elevatorStatus,Rectangle elevator, List<FloorGuiElements> floors) {
+
+    public static void checkBounds(ElevatorStatus elevatorStatus,Rectangle elevator, List<FloorGuiElements> floors) {
         Sensor collided = null;
         for (FloorGuiElements floor : floors) {
             for (Sensor sensor : floor.getSensors()) {

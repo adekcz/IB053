@@ -45,11 +45,15 @@ public class FloorGuiElements {
 
 
     public FloorGuiElements(Rectangle outline, int floorNumber, FloorType type) {
+        sensors = new ArrayList<>();
         this.floorNumber = floorNumber;
         this.outline = outline;
         outline.setFill(Color.WHITE);
         if(type.equals(FloorType.TOP)){
-            this.topSensor =  new Sensor(outline.getX(),outline.getY(), Events.Poloha.KN);
+            this.topSensor =  new Sensor(outline.getX(),outline.getY(), Events.Poloha.S);
+            sensors.add(new Sensor(outline.getX(),outline.getY()+20, Events.Poloha.P));
+            sensors.add(new Sensor(outline.getX(),outline.getY()+60, Events.Poloha.N));
+
         } else {
             this.topSensor =  new Sensor(outline.getX(),outline.getY()+outline.getHeight()-outline.getHeight()/4, Events.Poloha.N);
         }
@@ -78,7 +82,6 @@ public class FloorGuiElements {
         this.statusPanel.setStroke(Color.BLACK);
         
         allElements = new ArrayList<>();
-        sensors = new ArrayList<>();
 
         allElements.add(outline);
         allElements.add(button);

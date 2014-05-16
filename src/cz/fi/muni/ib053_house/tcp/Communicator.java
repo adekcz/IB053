@@ -30,6 +30,7 @@ public class Communicator {
     volatile private boolean killYourself = false;
 
 
+
     public Communicator() {
         this.houseController = HouseController.getInstance();
         houseController.setSettingsArea();

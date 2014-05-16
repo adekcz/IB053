@@ -52,6 +52,8 @@ public class HouseGuiElements {
 
     private volatile ElevatorStatus elevatorStatus;
     private Timer timer = new Timer();
+
+    
     
     // nastupiste - tlacitko - indikace stavu vytahu
     // motor,
@@ -101,9 +103,9 @@ public class HouseGuiElements {
     public void moveElevator(){
         sendable = false;
         timer  = new Timer();
-        int duration = 40;
+        int duration = 80;
         if (elevatorStatus.equals(ElevatorStatus.UP_SLOW) || elevatorStatus.equals(ElevatorStatus.DOWN_SLOW)){
-            duration = 200;
+            duration = 300;
 
         }
         final Timer reference = timer;
@@ -138,7 +140,7 @@ public class HouseGuiElements {
                         //(Y vytahu - Y nejvyssiho patra) % vyska patra
                         int nonAbsoluteDistance = (int) (elevator.getY() - floors.get(floors.size() - 1).getOutline().getY()) % FLOOR_HEIGHT;
                         
-                        if (normalizeModulo(nonAbsoluteDistance, 80) < 5) {
+                        if (normalizeModulo(nonAbsoluteDistance, 80) < 12) {
                             HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.P);
                             Platform.runLater(new Runnable() {
                                 @Override
@@ -149,7 +151,7 @@ public class HouseGuiElements {
                             System.out.println("STOJI V: " + Events.Pohyb.P);
                             return;
                         }
-                        if (Math.abs(normalizeModulo(-nonAbsoluteDistance, 80)) < 5) {
+                        if (Math.abs(normalizeModulo(-nonAbsoluteDistance, 80)) < 12) {
                             HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.P);
                             //move house exactly to right floor
                             Platform.runLater(new Runnable() {
@@ -178,84 +180,7 @@ public class HouseGuiElements {
             }
         }, 0, duration);
     }
-    public void moveElevator1() {
-        double deltaY = 10;
-        double duration = 0;
-        switch (elevatorStatus) {
-            case DOWN_NORMAL:
-                duration = 40;
-                //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
-                break;
-            case DOWN_SLOW:
-                duration = 200;
-                //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
-                break;
-            case UP_NORMAL:
-                duration = 40;
-                deltaY *= -1;
-                //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
-                break;
-            case UP_SLOW:
-                duration = 200;
-                deltaY *= -1;
-                //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
-                break;
-            case STILL:
-                
-                //(Y vytahu - Y nejvyssiho patra) % vyska patra
-                int nonAbsoluteDistance = (int) (elevator.getY() - floors.get(floors.size() - 1).getOutline().getY()) % FLOOR_HEIGHT;
-                System.out.println(nonAbsoluteDistance);
-                System.out.println(normalizeModulo(nonAbsoluteDistance, FLOOR_HEIGHT));
-                
-                if (normalizeModulo(nonAbsoluteDistance, 80) < 5) {
-                    HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.P);
-                    elevator.setY(elevator.getY() - normalizeModulo(nonAbsoluteDistance, 80));
-                    //move house exactly to right floor
-                    System.out.println("STOJI V: " + Events.Pohyb.P);
-                    return;
-                }
-                if (Math.abs(normalizeModulo(-nonAbsoluteDistance, 80)) < 5) {
-                    HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.P);
-                    //move house exactly to right floor
-                    elevator.setY(elevator.getY() + normalizeModulo(-nonAbsoluteDistance, 80));
-                    System.out.println("STOJI V: " + Events.Pohyb.P);
-                    return;
-                }
-                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.S);
-                System.out.println("STOJI V: " + Events.Pohyb.S);
-                
-                return;
-        }
-        
-        Path path = new Path();
-        System.out.println("elevatorY: " + elevator.getY());
-        path.getElements().add(new MoveTo(GuiHelper.getXForAnimation(elevator), GuiHelper.getYForAnimation(elevator)));
-        path.getElements().add(new LineTo(GuiHelper.getXForAnimation(elevator), GuiHelper.getYForAnimation(elevator)+deltaY));
-        final PathTransition pathTransition = new PathTransition();
-        pathTransition.setDuration(Duration.millis(duration*10));
-        pathTransition.setDelay(Duration.millis(300));
-        pathTransition.setPath(path);
-        pathTransition.setNode(elevator);
-        pathTransition.setOrientation(PathTransition.OrientationType.NONE);
-        pathTransition.setCycleCount(1);
-        pathTransition.play();
-        
-        final double tempDeltaY = deltaY;
-        pathTransition.setOnFinished(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                pathTransition.stop();
-                GuiHelper.checkBounds(elevatorStatus, elevator, floors);
-                System.out.println("finishIn: "+ elevator.getY());
-                elevator.setY( elevator.getY()-70);
-                //elevator.relocate(elevator.getX(), elevator.getY() + tempDeltaY);
-                System.out.println("finishOut "+ elevator.getY());
-                moveElevator();
-            }
-        });
-        
-        //System.out.println("should be stopped");
-    }
+  
     
     private int normalizeModulo(int n1, int modulo) {
         
