@@ -6,19 +6,14 @@
 
 package cz.fi.muni.ib053_house.gui;
 
-import cz.fi.muni.ib053_house.settings.Commands;
-import cz.fi.muni.ib053_house.settings.Settings;
-import static cz.fi.muni.ib053_house.settings.Settings.runtimeSettings;
-import cz.fi.muni.ib053_house.tcp.Communicator;
 import javafx.application.Application;
-import javafx.fxml.FXML;
+import javafx.application.Platform;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
-import resources.TestTCPServer;
+import javafx.stage.WindowEvent;
 
 /**
  *
@@ -30,24 +25,37 @@ public class House extends Application {
 
      @Override
      public void start(Stage stage) throws Exception {
-         Parent root = FXMLLoader.load(getClass().getResource("HouseFxml.fxml"));
+         FXMLLoader loader =  new FXMLLoader(getClass().getResource("HouseFxml.fxml"));
+         Parent root =  loader.load();
          
          Scene scene = new Scene(root, 800,600);
          
          stage.setScene(scene);
+        
+         final HouseController controller = (HouseController)loader.getController();
+        ((Stage) root.getScene().getWindow()).setOnCloseRequest(new EventHandler<WindowEvent>() {
+             @Override
+             public void handle(WindowEvent event) {
+                 System.out.println("Koncim");
+                 controller.getCommunicator().setKillYourself(true);
+                 controller.getHouse().getTimer().cancel();
+                 Platform.exit();
+             }
+         });
          stage.show();
      }
      
-  
+     
      /**
       * @param args the command line arguments
       */
      public static void main(String[] args) {
          launch(args);
+         Platform.setImplicitExit(true);
          
      }
      
-   
+     
      
      
 }

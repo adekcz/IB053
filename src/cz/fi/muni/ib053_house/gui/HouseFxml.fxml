@@ -14,13 +14,7 @@
       <center>
         <ScrollPane prefHeight="337.9998779296875" prefWidth="347.0">
           <content>
-            <AnchorPane id="Content" fx:id="canvas" minHeight="0.0" minWidth="0.0" prefHeight="336.0003662109375" prefWidth="356.0">
-              <children>
-                <Button layoutX="14.0" layoutY="22.0" mnemonicParsing="false" onMouseClicked="#stopClicked" text="stop" />
-                <Button layoutX="61.0" layoutY="22.0" mnemonicParsing="false" onMouseClicked="#signalClicked" text="panel" />
-                <Button layoutX="127.0" layoutY="22.0" mnemonicParsing="false" onMouseClicked="#indikaceClicked" text="indikace" />
-              </children>
-            </AnchorPane>
+            <AnchorPane id="Content" fx:id="canvas" minHeight="0.0" minWidth="0.0" prefHeight="336.0003662109375" prefWidth="356.0" />
           </content>
         </ScrollPane>
       </center>
@@ -39,8 +33,13 @@
             <Label id="" fx:id="lblFloorCount" layoutX="141.0" layoutY="55.0" text="Label" />
             <Label id="" fx:id="lblGroundZero" layoutX="141.0" layoutY="68.0" text="Label" />
             <Label id="" fx:id="lblCurrentFloor" layoutX="141.0" layoutY="110.0" text="Label" />
-            <TextArea id="" fx:id="txtAreaOutput" editable="false" layoutX="0.0" layoutY="181.0" prefWidth="167.0" wrapText="true" />
-            <Label layoutX="10.0" layoutY="162.0" text="gui output:" />
+            <Label layoutX="10.0" layoutY="162.0" text="debug purpose only" />
+            <Button layoutX="18.0" layoutY="186.0" mnemonicParsing="false" onMouseClicked="#stopClicked" text="stop" />
+            <Button layoutX="18.0" layoutY="291.0" mnemonicParsing="false" onMouseClicked="#signalClicked" text="panel" />
+            <Button layoutX="18.0" layoutY="265.0" mnemonicParsing="false" onMouseClicked="#indikaceClicked" text="indikace" />
+            <Button layoutX="18.0" layoutY="212.0" mnemonicParsing="false" onMouseClicked="#nahoruClicked" text="nahoru" />
+            <Button layoutX="21.0" layoutY="239.0" mnemonicParsing="false" onMouseClicked="#doluClicked" text="dolu" />
+            <CheckBox fx:id="chckBxSlow" layoutX="87.0" layoutY="215.0" mnemonicParsing="false" text="pomalu?" />
           </children>
         </Pane>
       </left>

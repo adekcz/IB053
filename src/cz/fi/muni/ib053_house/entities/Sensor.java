@@ -20,8 +20,8 @@ public class Sensor {
     private final Events.Poloha type;
     private boolean  collisionDetected = false;
 
-    public Sensor(Circle outline, Events.Poloha type) {
-        this.outline = outline;
+    public Sensor(double x, double y, Events.Poloha type) {
+        this.outline = new Circle(x, y, 5);
         this.type = type;
     }
 
@@ -40,7 +40,6 @@ public class Sensor {
         this.collisionDetected = c;
     }
 
-    
     
     
 }

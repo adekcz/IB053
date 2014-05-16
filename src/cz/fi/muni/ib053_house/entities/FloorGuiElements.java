@@ -11,6 +11,7 @@ import cz.fi.muni.ib053_house.settings.Commands;
 import cz.fi.muni.ib053_house.settings.Events;
 import cz.fi.muni.ib053_house.settings.FloorType;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,32 +32,34 @@ import javafx.util.Duration;
  * @author Michal Keda
  */
 public class FloorGuiElements {
-    private int floorNumber;
+    private final int floorNumber;
     private final Sensor topSensor;
     private final Sensor middleSensor;
     private final Sensor bottomSensor;
     private final Rectangle outline;
     private final Rectangle button;
     private final Rectangle statusPanel;
-    private Text status;
-    private List<Node> allElements;
-    private List<Sensor> sensors;
+    private final Text status;
+    private final List<Node> allElements;
+    private final List<Sensor> sensors;
+
 
     public FloorGuiElements(Rectangle outline, int floorNumber, FloorType type) {
         this.floorNumber = floorNumber;
         this.outline = outline;
         outline.setFill(Color.WHITE);
         if(type.equals(FloorType.TOP)){
-            this.topSensor =  new Sensor(new Circle(outline.getX(),outline.getY()+outline.getHeight()-outline.getHeight()/4,5), Events.Poloha.KN);
+            this.topSensor =  new Sensor(outline.getX(),outline.getY(), Events.Poloha.KN);
         } else {
-            this.topSensor =  new Sensor(new Circle(outline.getX(),outline.getY()+outline.getHeight()-outline.getHeight()/4,5), Events.Poloha.N);
+            this.topSensor =  new Sensor(outline.getX(),outline.getY()+outline.getHeight()-outline.getHeight()/4, Events.Poloha.N);
         }
         
-        this.middleSensor =  new Sensor(new Circle(outline.getX(),outline.getY()+outline.getHeight(),5), Events.Poloha.S);
         if(type.equals(FloorType.BOTTOM)){
-            this.bottomSensor =  new Sensor(new Circle(outline.getX(),outline.getY()+outline.getHeight()+outline.getHeight()/4,5), Events.Poloha.S0);
+            this.bottomSensor = null;
+            this.middleSensor = new Sensor(outline.getX(),outline.getY()+outline.getHeight(), Events.Poloha.S0);
         } else {
-            this.bottomSensor =  new Sensor(new Circle(outline.getX(),outline.getY()+outline.getHeight()+outline.getHeight()/4,5), Events.Poloha.P);
+            this.middleSensor =  new Sensor(outline.getX(),outline.getY()+outline.getHeight(), Events.Poloha.S);
+            this.bottomSensor =  new Sensor(outline.getX(),outline.getY()+outline.getHeight()+outline.getHeight()/4, Events.Poloha.P);
         }
         this.button = new Rectangle(outline.getX()+10, outline.getY()+ outline.getHeight()/2, outline.getHeight()/6,outline.getHeight()/6);
         this.button.setFill(Color.RED);
@@ -64,9 +67,6 @@ public class FloorGuiElements {
         this.button.setOnMouseClicked(new EventHandler<MouseEvent>() {
  
             public void handle(MouseEvent event) {
-                System.out.println(floorNumber + " was clicked");
-                //HouseController.getInstance().getHouse().setElevatorStatus(ElevatorStatus.UP_NORMAL);
-                //HouseController.getInstance().getHouse().moveElevator();
                 HouseController.getInstance().getCommunicator().tlacitko(floorNumber);
             }
         });
@@ -88,40 +88,9 @@ public class FloorGuiElements {
         sensors.add(bottomSensor);
         sensors.add(topSensor);
 
-        allElements.addAll(sensors.stream().map(s -> s.getOutline()).collect(Collectors.toList()));
-        
-        this.topSensor.getOutline().toFront();
-        this.bottomSensor.getOutline().toFront();
-        this.topSensor.getOutline().toFront();
+        allElements.addAll(getSensorsOutlines());
     }
 
-    public List<Node> getAllElementsUnmodifiable() {
-        return Collections.unmodifiableList(allElements);
-    }
-
-    public Circle getTopSensor() {
-        return topSensor.getOutline();
-    }
-
-    public Circle getMiddleSensor() {
-        return middleSensor.getOutline();
-    }
-
-    public Circle getBottomSensor() {
-        return bottomSensor.getOutline();
-    }
-
-    public Rectangle getOutline() {
-        return outline;
-    }
-
-    public Rectangle getButton() {
-        return button;
-    }
-
-    public Rectangle getStatusPanel() {
-        return statusPanel;
-    }
 
     private FillTransition ft;
     public void indikace(Commands.IndikaceStav stav) {
@@ -152,8 +121,45 @@ public Text getStatus() {
     }
 
     public Iterable<Sensor> getSensors() {
-        return Collections.unmodifiableList(sensors);
+        return Collections.unmodifiableList(sensors.stream().filter(s -> s!=null).collect(Collectors.toList()));
         
     }
+
+    private Collection<? extends Node> getSensorsOutlines() {
+        return Collections.unmodifiableList(sensors.stream().filter(s -> s!=null).map(s -> s.getOutline()).collect(Collectors.toList()));
+    }
+    
+    public List<Node> getAllElementsUnmodifiable() {
+        return Collections.unmodifiableList(allElements);
+    }
+
+    public Circle getTopSensor() {
+        return topSensor.getOutline();
+    }
+
+    public Circle getMiddleSensor() {
+        return middleSensor.getOutline();
+    }
+
+    public Circle getBottomSensor() {
+        return bottomSensor.getOutline();
+    }
+
+    public Rectangle getOutline() {
+        return outline;
+    }
+
+    public Rectangle getButton() {
+        return button;
+    }
+
+    public Rectangle getStatusPanel() {
+        return statusPanel;
+    }
+
+    public int getFloorNumber() {
+        return floorNumber;
+    }
+    
 }
 

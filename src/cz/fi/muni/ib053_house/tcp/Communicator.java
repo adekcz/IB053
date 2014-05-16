@@ -27,6 +27,8 @@ public class Communicator {
     public static TCPConnection transmitter;
     //remove cyclic dependency house -> communicator -> house
     private HouseController houseController;
+    volatile private boolean killYourself = false;
+
 
     public Communicator() {
         this.houseController = HouseController.getInstance();
@@ -41,7 +43,7 @@ public class Communicator {
         new Thread() {
             @Override
             public void run() {
-                while (true) {
+                while (!killYourself) {
                     try {
                         Thread.sleep(150);
                     } catch (InterruptedException ex) {
@@ -70,6 +72,11 @@ public class Communicator {
                     } catch (IllegalArgumentException ex){
                         Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                }
+                try {
+                    transmitter.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(Communicator.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }.start();
@@ -102,5 +109,12 @@ public class Communicator {
 
     public void tlacitko(int floor) {
         sendMessage(Events.TLACITKO + ";" + floor);
+    }
+    public boolean isKillYourself() {
+        return killYourself;
+    }
+
+    public void setKillYourself(boolean killYourself) {
+        this.killYourself = killYourself;
     }
 }

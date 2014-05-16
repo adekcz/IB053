@@ -1,26 +1,27 @@
 /*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+* To change this template, choose Tools | Templates
+* and open the template in the editor.
+*/
 package cz.fi.muni.ib053_house.entities;
 
 import cz.fi.muni.ib053_house.gui.HouseController;
+import cz.fi.muni.ib053_house.helpers.GuiHelper;
 import cz.fi.muni.ib053_house.settings.Commands;
 import cz.fi.muni.ib053_house.settings.Events;
 import cz.fi.muni.ib053_house.settings.FloorType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
-import javafx.animation.Animation;
 import javafx.animation.PathTransition;
-import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.CubicCurveTo;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
@@ -33,134 +34,206 @@ import javafx.util.Duration;
  * @author Michal Keda
  */
 public class HouseGuiElements {
-    private final int  FLOOR_HEIGHT = 80;
-    private final int  FLOOR_WIDTH = 200;
-    private final int GENERAL_MARGIN = 40;
     
-    //sizes of others component
+    private final int FLOOR_HEIGHT = 80;
+    private final int FLOOR_WIDTH = 200;
+    private final int GENERAL_MARGIN = 40;
     private final int GENERAL_WIDTH = 40;
     private final int GENERAL_HEIGHT = 40;
-
     
     private final int groundzero;
-    private final int expectedNumberOfFloors; // 
-
+    private final int expectedNumberOfFloors; //
+    
     private Rectangle shaft;
     private List<FloorGuiElements> floors = new ArrayList<>();
     private Rectangle engine;
     private Circle lastSensor;
     private Rectangle elevator;
-    private volatile ElevatorStatus elevatorStatus;
 
-   // nastupiste - tlacitko - indikace stavu vytahu
+    private volatile ElevatorStatus elevatorStatus;
+    private Timer timer = new Timer();
+    
+    // nastupiste - tlacitko - indikace stavu vytahu
     // motor,
     // sachta s cidly pred, za, ve stanici + za posledni stanici
-
     public HouseGuiElements(int groundzero, int numberOfFloors) {
-    this.expectedNumberOfFloors = numberOfFloors;
-    this.groundzero = groundzero;
-    for(int i = 0; i<numberOfFloors;i++){
-        addFloor();
-    }
-    this.shaft = new Rectangle(GENERAL_MARGIN, getHeight() - GENERAL_MARGIN  - (numberOfFloors-1)*FLOOR_HEIGHT, GENERAL_WIDTH, numberOfFloors*FLOOR_HEIGHT);
-    this.elevator = new Rectangle(GENERAL_MARGIN, getHeight() - GENERAL_MARGIN , GENERAL_WIDTH, 10);
-    this.elevatorStatus = ElevatorStatus.STILL;
-    this.lastSensor =  new Circle(GENERAL_MARGIN + GENERAL_WIDTH, GENERAL_MARGIN+FLOOR_HEIGHT, 5);
-    
-    //you should style elements by CSS
-    shaft.setStroke(Color.BLACK);
-    shaft.setFill(Color.WHITE);
-    elevator.setOpacity(0.1);
-    
-    
-    for(Node node: getAllElementsUnmodifiable()){
-        if(node instanceof Shape){
-            Shape shape = (Shape) node;
-            //shape.setOpacity(0.1);
+        this.expectedNumberOfFloors = numberOfFloors;
+        this.groundzero = groundzero;
+        for (int i = 0; i < numberOfFloors; i++) {
+            addFloor();
         }
-    }
-}
-//TODO move to other class
-    public static double getXForAnimation(Rectangle n){
-        return n.getX()+n.getWidth()/2; // animations will take element from its middle (teziste asi)
-    }
-    public static double getYForAnimation(Rectangle n){
-        return n.getY()+n.getHeight()/2;
-    }
-    private void checkBounds(Shape elevator, List<FloorGuiElements> floors) {
-        Sensor collided = null;
-        for(FloorGuiElements floor: floors){
-            for (Sensor sensor  : floor.getSensors()) {
-                Shape checkedSensor = sensor.getOutline();
-                if(sensor.isCollisionDetected()){
-                    continue;
-                }
-                if (elevator.getBoundsInParent().intersects(checkedSensor.getBoundsInParent())) {
-                    collided  = sensor;
-                    if(!sensor.isCollisionDetected()){
-                        sensor.setCollisionDetected(true);
-                    }
-                    
-                    checkedSensor.setFill(Color.PURPLE);
-                } else{
-                    sensor.setCollisionDetected(false);
-                }
-            }
-        }
+        this.shaft = new Rectangle(GENERAL_MARGIN, getHeight() - GENERAL_MARGIN - (numberOfFloors - 1) * FLOOR_HEIGHT, GENERAL_WIDTH, numberOfFloors * FLOOR_HEIGHT);
+        this.elevator = new Rectangle(GENERAL_MARGIN, getHeight() - GENERAL_MARGIN, GENERAL_WIDTH, FLOOR_HEIGHT);
+        this.elevatorStatus = ElevatorStatus.STILL;
+        this.lastSensor = new Circle(GENERAL_MARGIN + GENERAL_WIDTH, GENERAL_MARGIN + FLOOR_HEIGHT, 5);
         
-        if (collided!= null && collided.isCollisionDetected()) {
-            HouseController.getInstance().getCommunicator().poloha(collided.getType());
-            System.out.println("collision" + collided.getType());
-            elevator.setFill(Color.BLUE);
-        } else {
-            elevator.setFill(Color.GREEN);
+        //you should style elements by CSS
+        shaft.setStroke(Color.BLACK);
+        shaft.setFill(Color.WHITE);
+        elevator.setOpacity(0.1);
+        
+      //  for (Node node : getAllElementsUnmodifiable()) {
+      //      if (node instanceof Shape) {
+      //          Shape shape = (Shape) node;
+      //          //shape.setOpacity(0.1);
+      //      }
+      //  }
+    }
+    
+    public Timer getTimer() {
+        return timer;
+    }
+    
+
+    public void emptyTimers(TimerTask task, Timer timer){
+        sendable = true;
+        if(task!=null){
+            task.cancel();
+        }
+        if (timer != null){
+            timer.cancel();
+            timer.purge();
         }
     }
+
+    //simple solution for concurent running timer job
+    private static volatile boolean sendable = false;
     public void moveElevator(){
-        double deltaY = 2;
+        sendable = false;
+        timer  = new Timer();
+        int duration = 40;
+        if (elevatorStatus.equals(ElevatorStatus.UP_SLOW) || elevatorStatus.equals(ElevatorStatus.DOWN_SLOW)){
+            duration = 200;
+
+        }
+        final Timer reference = timer;
+        timer.scheduleAtFixedRate(new TimerTask() {
+            private boolean dead = false;
+            private Timer ref = reference;
+
+            @Override
+            public void run() {
+                if(dead || sendable){
+                    return;
+                }
+                double deltaY = 1;
+                switch (elevatorStatus) {
+                    case DOWN_NORMAL:
+                        //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
+                        break;
+                    case DOWN_SLOW:
+                        //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
+                        break;
+                    case UP_NORMAL:
+                        deltaY = -1;
+                        //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
+                        break;
+                    case UP_SLOW:
+                        deltaY = -1;
+                        //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
+                        break;
+                    case STILL:
+                        emptyTimers(this, ref);
+                        dead = true;
+                        //(Y vytahu - Y nejvyssiho patra) % vyska patra
+                        int nonAbsoluteDistance = (int) (elevator.getY() - floors.get(floors.size() - 1).getOutline().getY()) % FLOOR_HEIGHT;
+                        
+                        if (normalizeModulo(nonAbsoluteDistance, 80) < 5) {
+                            HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.P);
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    elevator.setY(elevator.getY() - normalizeModulo(nonAbsoluteDistance, 80));
+                                }});
+                            //move house exactly to right floor
+                            System.out.println("STOJI V: " + Events.Pohyb.P);
+                            return;
+                        }
+                        if (Math.abs(normalizeModulo(-nonAbsoluteDistance, 80)) < 5) {
+                            HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.P);
+                            //move house exactly to right floor
+                            Platform.runLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    elevator.setY(elevator.getY() + normalizeModulo(-nonAbsoluteDistance, 80));
+                                }});
+                            System.out.println("STOJI V: " + Events.Pohyb.P);
+                            return;
+                        }
+                        HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.S);
+                        System.out.println("STOJI V: " + Events.Pohyb.S);
+                        return;
+                }
+                
+                
+                
+                final double tempDeltaY = deltaY;
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        GuiHelper.checkBounds(elevatorStatus, elevator, floors);
+                        elevator.setY( elevator.getY()+tempDeltaY);
+                    }});
+                
+            }
+        }, 0, duration);
+    }
+    public void moveElevator1() {
+        double deltaY = 10;
         double duration = 0;
-        switch(elevatorStatus){
+        switch (elevatorStatus) {
             case DOWN_NORMAL:
-                duration= 10;
-                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
+                duration = 40;
+                //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                 break;
             case DOWN_SLOW:
-                duration= 50;
-                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
+                duration = 200;
+                //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                 break;
             case UP_NORMAL:
-                duration= 10;
+                duration = 40;
                 deltaY *= -1;
-                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
+                //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                 break;
             case UP_SLOW:
-                duration= 50;
+                duration = 200;
                 deltaY *= -1;
-                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
+                //HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.J);
                 break;
             case STILL:
                 
                 //(Y vytahu - Y nejvyssiho patra) % vyska patra
-                int modularDistanceFromFloor = ((int) Math.abs(elevator.getY()-floors.get(floors.size()-1).getOutline().getY()))%FLOOR_HEIGHT;
+                int nonAbsoluteDistance = (int) (elevator.getY() - floors.get(floors.size() - 1).getOutline().getY()) % FLOOR_HEIGHT;
+                System.out.println(nonAbsoluteDistance);
+                System.out.println(normalizeModulo(nonAbsoluteDistance, FLOOR_HEIGHT));
                 
-                if(modularDistanceFromFloor<5 || FLOOR_HEIGHT-modularDistanceFromFloor < 5){
-                    HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.S);
-                }else{
+                if (normalizeModulo(nonAbsoluteDistance, 80) < 5) {
                     HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.P);
-                    
+                    elevator.setY(elevator.getY() - normalizeModulo(nonAbsoluteDistance, 80));
+                    //move house exactly to right floor
+                    System.out.println("STOJI V: " + Events.Pohyb.P);
+                    return;
                 }
+                if (Math.abs(normalizeModulo(-nonAbsoluteDistance, 80)) < 5) {
+                    HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.P);
+                    //move house exactly to right floor
+                    elevator.setY(elevator.getY() + normalizeModulo(-nonAbsoluteDistance, 80));
+                    System.out.println("STOJI V: " + Events.Pohyb.P);
+                    return;
+                }
+                HouseController.getInstance().getCommunicator().pohyb(Events.Pohyb.S);
+                System.out.println("STOJI V: " + Events.Pohyb.S);
+                
                 return;
         }
         
-        
-        
-        
         Path path = new Path();
-        path.getElements().add(new MoveTo(getXForAnimation(elevator), getYForAnimation(elevator)));
-        path.getElements().add(new LineTo(getXForAnimation(elevator), getYForAnimation(elevator)+deltaY));
-        PathTransition pathTransition = new PathTransition();
-        pathTransition.setDuration(Duration.millis(duration));
-        //pathTransition.setDelay(Duration.millis(300));
+        System.out.println("elevatorY: " + elevator.getY());
+        path.getElements().add(new MoveTo(GuiHelper.getXForAnimation(elevator), GuiHelper.getYForAnimation(elevator)));
+        path.getElements().add(new LineTo(GuiHelper.getXForAnimation(elevator), GuiHelper.getYForAnimation(elevator)+deltaY));
+        final PathTransition pathTransition = new PathTransition();
+        pathTransition.setDuration(Duration.millis(duration*10));
+        pathTransition.setDelay(Duration.millis(300));
         pathTransition.setPath(path);
         pathTransition.setNode(elevator);
         pathTransition.setOrientation(PathTransition.OrientationType.NONE);
@@ -171,24 +244,46 @@ public class HouseGuiElements {
         pathTransition.setOnFinished(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                checkBounds(elevator, floors);
-                //System.out.println("finishIn: "+ elevator.getY());
-                elevator.setY(elevator.getY()+tempDeltaY);
-                //System.out.println("finishOut "+ elevator.getY());
+                pathTransition.stop();
+                GuiHelper.checkBounds(elevatorStatus, elevator, floors);
+                System.out.println("finishIn: "+ elevator.getY());
+                elevator.setY( elevator.getY()-70);
+                //elevator.relocate(elevator.getX(), elevator.getY() + tempDeltaY);
+                System.out.println("finishOut "+ elevator.getY());
                 moveElevator();
             }
         });
         
         //System.out.println("should be stopped");
+    }
+    
+    private int normalizeModulo(int n1, int modulo) {
+        
+        int modN1 = n1 % modulo;
+        modN1 = modN1 < 0 ? modN1 + modulo : modN1;
+        return modN1;
+    }
+    
+    private boolean modularEquals(int n1, int n2, int modulo) {
+        int modN1 = n1 % modulo;
+        int modN2 = n2 % modulo;
+        modN1 = modN1 < 0 ? modN1 + modulo : modN1;
+        modN2 = modN2 < 0 ? modN2 + modulo : modN2;
+        if (modN1 == modN2) {
+            return true;
+        }
+        
+        return false;
         
     }
-    public void moveElevatorTo(FloorGuiElements floor){
-        //System.out.println("should be moving");
-        double origin = getXForAnimation(elevator);
-        double destination = getXForAnimation(shaft);
+    
+    public void moveElevatorTo(FloorGuiElements floor) {
+//System.out.println("should be moving");
+        double origin = GuiHelper.getXForAnimation(elevator);
+        double destination = GuiHelper.getXForAnimation(shaft);
         Path path = new Path();
-        path.getElements().add(new MoveTo(origin, getYForAnimation(elevator)));
-        path.getElements().add(new LineTo(destination, getYForAnimation(floor.getOutline())));
+        path.getElements().add(new MoveTo(origin, GuiHelper.getYForAnimation(elevator)));
+        path.getElements().add(new LineTo(destination, GuiHelper.getYForAnimation(floor.getOutline())));
         PathTransition pathTransition = new PathTransition();
         pathTransition.setDuration(Duration.millis(4000));
         pathTransition.setPath(path);
@@ -204,47 +299,50 @@ public class HouseGuiElements {
             }
         });
         
-        //System.out.println("should be stopped");
     }
+    
     public List<Node> getAllElementsUnmodifiable() {
         List<Node> temp = new ArrayList<>();
         temp.add(shaft);
         temp.add(engine);
         temp.add(lastSensor);
         temp.add(elevator);
-        for(FloorGuiElements floor: floors){
+        for (FloorGuiElements floor : floors) {
             temp.addAll(floor.getAllElementsUnmodifiable());
             
         }
         
-        return Collections.unmodifiableList(temp.stream().filter((node) -> node !=null).collect(Collectors.toList()));
+        return Collections.unmodifiableList(temp.stream().filter((node) -> node != null).collect(Collectors.toList()));
     }
     
     
     
-    public int getWidth(){
-        return GENERAL_MARGIN*2 + FLOOR_WIDTH + GENERAL_WIDTH*2; //margins, floor, shaft with elevator, motor
-    }
-    public final int getHeight(){
-        return GENERAL_MARGIN*2 + FLOOR_HEIGHT*expectedNumberOfFloors;
-        
-    }
-    public void addFloor(){
+    public void addFloor() {
         Rectangle floor = new Rectangle(FLOOR_WIDTH, FLOOR_HEIGHT);
         floor.setStroke(Color.BLUEVIOLET);
-        floor.setX(GENERAL_MARGIN+GENERAL_WIDTH);
-        if(floors.isEmpty()){
+        floor.setX(GENERAL_MARGIN + GENERAL_WIDTH);
+        if (floors.isEmpty()) {
             floor.setY(getHeight() - GENERAL_MARGIN);
             floors.add(new FloorGuiElements(floor, 0, FloorType.BOTTOM));
             
-        } else if (expectedNumberOfFloors == floors.size()) {
-            floors.add(new FloorGuiElements(floor, 0, FloorType.TOP));
-        }
-        else {
-            FloorGuiElements last = floors.get(floors.size()-1);
+        } else if (expectedNumberOfFloors-1 == floors.size()) { //-1 bcs current is not added to list
+            FloorGuiElements last = floors.get(floors.size() - 1);
             floor.setY(last.getOutline().getY() - FLOOR_HEIGHT);
-            floors.add(new FloorGuiElements(floor, floors.size(), floors.size()==expectedNumberOfFloors ? FloorType.TOP: FloorType.REGULAR));
+            floors.add(new FloorGuiElements(floor, floors.size(), FloorType.TOP));
+        } else {
+            FloorGuiElements last = floors.get(floors.size() - 1);
+            floor.setY(last.getOutline().getY() - FLOOR_HEIGHT);
+            floors.add(new FloorGuiElements(floor, floors.size(), FloorType.REGULAR));
         }
+        
+    }
+    
+    public int getWidth() {
+        return GENERAL_MARGIN * 2 + FLOOR_WIDTH + GENERAL_WIDTH * 2; //margins, floor, shaft with elevator, motor
+    }
+    
+    public final int getHeight() {
+        return GENERAL_MARGIN * 2 + FLOOR_HEIGHT * expectedNumberOfFloors;
         
     }
     
@@ -285,14 +383,12 @@ public class HouseGuiElements {
     }
     
     public void controlDoors(Commands.PanelSmer smer) {
-        if(smer.equals(smer.S)){
+        if (smer.equals(smer.S)) {
             elevator.setFill(Color.BLACK);
         }
-        if(smer.equals(smer.K)){
+        if (smer.equals(smer.K)) {
             elevator.setFill(Color.GREEN);
         }
     }
-    
-    
     
 }
